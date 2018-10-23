@@ -1,0 +1,14 @@
+#header {
+  padding: 0 50px;
+  margin: 0 auto;
+  background: gray !important;
+}
+
+#header h1 {
+  width: 50%;
+  text-align: center;
+  display: inline-block;
+}
+
+#add-new-task {
+}

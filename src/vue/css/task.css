@@ -1,0 +1,23 @@
+#task-list {
+  list-style: none;
+  width: 80%;
+  margin: 0 auto;
+}
+#task-list li {
+  margin: 20px 0px;
+  text-align: center;
+}
+
+.task-name {
+  width: 30% !important;
+  padding: 0 15px;
+  display: inline-block;
+}
+.remove-task {
+  background: #f55656 !important;
+  border-color: #fa5656 !important;
+}
+.remove-task:active {
+  background: #a84545 !important;
+  border-color: #ac4545 !important;
+}

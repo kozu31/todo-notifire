@@ -1,0 +1,13 @@
+html {
+  height: 100%;
+  width: 100%;
+}
+h1 {
+  color: red
+}
+body {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  background: #656565;
+}
