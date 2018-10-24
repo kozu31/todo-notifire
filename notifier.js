@@ -1,10 +1,10 @@
 const NN = require('node-notifier')
 
 module.exports = {
-  notification: (param) => {
+  notification: (title = 'Todo Notifier', message = 'Sample Notification') => {
     NN.notify({
-      title: param.title ? param.title : 'Todo Notifier',
-      message: param.message ? param.message : 'Sample Notification',
+      title,
+      message,
       wait: true
     })
   }

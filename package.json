@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "element-ui": "^2.4.8",
+    "jsonfile": "^5.0.0",
     "nedb": "^1.8.0",
     "vue": "^2.5.17"
   }
