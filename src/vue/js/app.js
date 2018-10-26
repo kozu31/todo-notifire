@@ -10,17 +10,17 @@ const notification = (title, message) => {
 
 const database = remote.require('./database')
 const setting = remote.require('./setting')
-/*
-const main = require('electron').remote.require('./notifier')
-const notification = () => {
-  main.notification()
+const taskStatus = {
+  todo: { text: 'Todo', color: '#39ff64' },
+  notified: { text: 'Notified', color: '#ffec2a' },
+  expired: { text: 'Expired', color: '#ff2a2a' }
 }
-*/
+
 export default {
   data: {
     taskList: [],
-    taskCheckInterval: 6000,
-    notifyInterval: '30:00',
+    taskCheckInterval: 1000,
+    notifyInterval: '30:00'
   },
   created: function () {
     this.taskCheckInterval = setting.get('taskCheckInterval')
@@ -35,7 +35,11 @@ export default {
           this.taskList.push({
             _id: data._id,
             name: data.name,
-            limitDateTime: data.limitDateTime
+            limitDateTime: data.limitDateTime,
+            notified: data.notified,
+            expired: data.expired,
+            statusText: data.statusText,
+            statusColor: data.statusColor
           })
         }
       }
@@ -55,28 +59,60 @@ export default {
         let now = Date.parse((new Date()))
         let limitDateTime = Date.parse(task.limitDateTime)
         let diff = limitDateTime - now
-        if (diff < notifyInterval && diff > 0 && !task.notified) {
-          console.log(notifyInterval, diff)
+        if (diff < notifyInterval && diff > 0) {
+          if (task.notified) continue
           let title = 'そろそろタスクの締め切り前です!'
           let message = task.name
-          database.updateData({ notified: true }, { _id: task._id }, false, (res) => {
+          let doc = {
+            expired: true,
+            statusText: taskStatus.notified.text,
+            statusColor: taskStatus.notified.color
+          }
+
+          database.updateData(doc, { _id: task._id }, false, (res) => {
             if (!res) {
-              console.log('Failed notified')
+              console.log('Failed to change mode')
             } else {
               task.notified = true
+              task.statusText = taskStatus.notified.text
+              task.statusColor = taskStatus.notified.color
               notification(title, message)
             }
           })
-        } else if (now > limitDateTime && !task.expired) {
-          console.log(notifyInterval, diff)
+        } else if (diff < 0) {
+          if (task.expired) continue
           let title = '締め切りです!'
           let message = task.name
-          task.expired = true
-          database.updateData({ expired: true }, { _id: task._id }, false, (res) => {
+          let doc = {
+            expired: true,
+            statusText: taskStatus.expired.text,
+            statusColor: taskStatus.expired.color
+          }
+          database.updateData(doc, { _id: task._id }, false, (res) => {
             if (!res) {
-              console.log('Failed expired')
+              console.log('Failed to change mode')
             } else {
+              task.expired = true
+              task.statusText = taskStatus.expired.text
+              task.statusColor = taskStatus.expired.color
               notification(title, message)
+            }
+          })
+        } else {
+          let doc = {
+            notified: false,
+            expired: false,
+            statusText: taskStatus.todo.text,
+            statusColor: taskStatus.todo.color
+          }
+          database.updateData(doc, { _id: task._id }, false, (res) => {
+            if (!res) {
+              console.log('Failed to change mode')
+            } else {
+              task.expired = false
+              task.notified = false
+              task.statusText = taskStatus.todo.text
+              task.statusColor = taskStatus.todo.color
             }
           })
         }
@@ -85,15 +121,22 @@ export default {
   },
   methods: {
     addNewTask: function () {
+      let now = new Date()
+      let date = now.setDate(now.getDate() + 1)
       let task = {
         name: '',
-        limitDateTime: '',
+        limitDateTime: date,
+        statusText: taskStatus.todo.text,
+        statusColor: taskStatus.todo.color,
         notified: false,
         expired: false
       }
+      this.taskList.push(task)
       database.insertData(task, (res) => {
         console.log(res)
-        this.taskList.push(res)
+        let _id = res._id
+        let index = this.taskList.length - 1
+        this.taskList[index]._id = _id
       })
     },
     changeTaskName: function (index) {
@@ -120,6 +163,7 @@ export default {
         notified: false,
         expired: false
       }
+      console.log('changeTask')
       database.updateData(doc, param, false, (res) => {
         if (!res) {
           console.log('Failed updating')

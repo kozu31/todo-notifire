@@ -17,14 +17,12 @@
     </section>
     <section id="content">
       <ul id="task-list">
-        <li v-for="(task, index) in taskList" v-bind:key="task._id">
-          <span class="notified" v-if="task.notified === true">Notified</span>
-          <span class="expired" v-else-if="task.expired === true">Expired</span>
-          <span class="todo" v-else>Todo</span>
-          <el-input class="task-name" type="text" v-model="task.name" v-on:blur="changeTaskName(index)"/>
+        <li v-for="(task, index) in taskList">
+          <span v-bind:style="{ color: task.statusColor}">{{ task.statusText }}</span>
+          <el-input class="task-name" type="text" v-model="task.name" v-on:change="changeTaskName(index)"/>
           <el-date-picker
             v-model="task.limitDateTime"
-            v-on:blur="changeLimitDateTime(index)"
+            v-on:change="changeLimitDateTime(index)"
             type="datetime"
             placeholder="Select limit datetime">
           </el-date-picker>
